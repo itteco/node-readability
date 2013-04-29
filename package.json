@@ -1,6 +1,6 @@
 {
     "name": "readability",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Arc90's readability.js adapted to node.js",
     "keywords": [
         "readability"
@@ -9,14 +9,14 @@
         {
             "name": "Arrix",
             "email": "arrixzhou@gmail.com",
-            "web": "http://arrix.blogspot.com"
+            "url": "http://arrix.blogspot.com"
         }
     ],
     "contributors": [
         {
             "name": "Arrix",
             "email": "arrixzhou@gmail.com",
-            "web": "http://arrix.blogspot.com"
+            "url": "http://arrix.blogspot.com"
         },
         {
             "name": "Vincent Cao",
@@ -25,7 +25,7 @@
     ],
     "bugs": {
         "mail": "arrixzhou@gmail.com",
-        "web": "http://github.com/arrix/node-readability/issues"
+        "url": "http://github.com/arrix/node-readability/issues"
     },
     "licenses": [
         {
@@ -42,12 +42,19 @@
     "dependencies": {
        "mjsunit.runner": ">=0.1.0",
        "jsdom": ">=0.1.21",
-       "htmlparser": ">=1.7.3"
+       "htmlparser": ">=1.7.3",
+       "html5": ">0.1",
+       "iconv": ">=1.1.3"
     },
     "engines" : { "node" : ">=0.2.5" },
     "directories": {
         "lib": "lib"
     },
-    "main": "./lib/readability"
+    "main": "./lib/readability",
+    "readme": "# node-readability\n[Readability.js by Arc90](http://lab.arc90.com/experiments/readability/) ported to node.js.\n\nBlog post: [Server side readability with node.js](http://arrix.blogspot.com/2010/11/server-side-readability-with-nodejs.html)\n## Requirements\n* [node.js](http://nodejs.org/)\n* [jsdom](https://github.com/tmpvar/jsdom)\n* [htmlparser](https://github.com/tautologistics/node-htmlparser)\n\n## Live demo\nI'm working on it...\n## Example\n\n        var readability = require('readability');\n        //...\n        // This is an very early example. The API is subject to change.\n        readability.parse(html, url, function(result) {\n                console.log(result.title, result.content);\n        });\n\n## Performance\nIn my testing of 140 pages with an average size of **58KB** collected from [digg](http://digg.com/news.rss), [delicious](http://feeds.delicious.com/v2/rss/?count=50) and [hacker news](http://news.ycombinator.com/rss), the average time taken for each page is about **1.1 seconds** on a Mac Mini (2.4G Intel Core 2 Duo).\n## Limitation\n* no fetching next pages\n* no support for frames\n\n## Plan\n* Performance optimization\n* Better API, more options\n* Support more readability features",
+    "_id": "readability@0.1.1",
+    "dist": {
+        "shasum": "d7c0f89ef54f1fbfbfbd3798a1d5405193f5cfd4"
+    },
+    "_from": "node-readability@git://github.com/anatolyivanov/node-readability.git"
 }
-
