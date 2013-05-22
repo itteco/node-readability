@@ -2,4 +2,4 @@
 log/*.log
 dist/*
 *.tmproj
-
+.idea
