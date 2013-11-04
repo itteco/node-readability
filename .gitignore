@@ -3,3 +3,4 @@ log/*.log
 dist/*
 *.tmproj
 .idea
+node_modules
