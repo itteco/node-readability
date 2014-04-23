@@ -4,3 +4,4 @@ dist/*
 *.tmproj
 .idea
 node_modules
+**/test/preview/*
