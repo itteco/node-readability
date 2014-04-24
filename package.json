@@ -52,7 +52,8 @@
     "connect": "latest",
     "restify": "latest",
     "request": "latest",
-    "underScore":"latest"
+    "underScore":"latest",
+    "generic-pool":"git+https://joiningss@github.com/Joiningss/node-pool.git"
   },
   "engines": {
     "node": ">=0.2.5"

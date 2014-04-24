@@ -7,9 +7,9 @@ var readability = require('../lib/readability.js'),
 
 function cleanFile(path, url, cb) {
     var content = fs.readFileSync(path, 'utf-8');
-    readability.parse(content, url, {removeReadabilityArtifacts: false, removeClassNames: false, debug: true, profile: 1}, cb);
+    readability.parse(content, url, {removeReadabilityArtifacts: false, removeClassNames: false, debug: false, profile: 1}, cb);
 }
-if (1) {
+if (0) {
  cleanFile(__dirname + '/weird-pages/w3c-css-no-closing-head.html', '', function(info) {
      //console.log(info.content);
  });
@@ -18,14 +18,15 @@ if (1) {
 }
 
 function batch_run() {
-    var dir = __dirname + '/pages/';
+    var dir = __dirname + '/sp-pages/';
     var files = fs.readdirSync(dir);
     var results = [];
-    //files.length = 10;
+    files.length = 1;
     files.forEach(function(f) {
 		if (!/\.html/i.test(f)) return;
         console.log('######## Processing file...', f);
         cleanFile(dir + f, '', function(result) {
+          console.log('result.content: '+result.content);
             results.push({time: result.time, file: f, inputLength: result.inputLength, error: result.error});
         });
     });

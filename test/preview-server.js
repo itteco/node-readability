@@ -5,7 +5,7 @@ var ip = require('ip');
 var fs = require('fs');
 var restify = require('restify');
 var connect = require('connect');
-var directory = 'preview';
+var directory = 'preview-html';
 var api_port = 8080;
 var html_server_port = 9090;
 
@@ -32,8 +32,8 @@ server.listen(api_port, function () {
 
 //get preview fileNames, order by time
 var getFileNamesInDir = function (dir){
-  if(!fs.exists('./'+dir)){
-    fs.mkdir('./'+dir);
+  if(!fs.existsSync(__dirname+'/'+dir)){
+    fs.mkdirSync(__dirname+'/'+dir);
   }
   var files = fs.readdirSync('./'+dir)
     .map(function(v) {
