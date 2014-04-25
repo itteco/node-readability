@@ -13,13 +13,12 @@ var crypto = require('crypto');
  * Config
  */
 
-var enableHtmlCache = false; // If true, generator will use name-matching html files in ./preview-html-cache before download it
+var enableHtmlCache = false; // If true, factory will use name-matching html files in ./preview-html-cache before download it
+
+var htmlTemple = '<!DOCTYPE html> <html> <head> <title> <!-- title --> </title> <meta content="text/html; charset=utf-8" http-equiv="content-type"/> <!-- css --> </head> <body> <!-- content --> </body> </html>';
 
 
-var htmlTemple = '<!DOCTYPE html> <html> <head> <title> </title> <meta content="text/html; charset=utf-8" http-equiv="content-type"/> </head> <!-- content --> </body> </html>';
-
-
-var generator = function (options) {
+var factory = function (options) {
   var selfInstance = this;
   selfInstance.options = _.extend({
     maxConnections: 1,
@@ -31,7 +30,9 @@ var generator = function (options) {
     debug: false,
     enableHtmlCache: true,
     cacheDirName: 'preview-html-cache',
-    previewDirName:'preview-html'
+    previewDirName:'preview-html',
+    cssThemeDirName:'preview-css-theme',
+    cssTheme:'default'
   }, options);
   // Don't make these options persist to individual queries
   var masterOnlyOptions = ["maxConnections", "priorityRange", "onDrain"];
@@ -50,7 +51,7 @@ var generator = function (options) {
   var plannedQueueCallsCount = 0;
   var queuedCount = 0;
   var cacheFileNames = [];
-  selfInstance.startGenerator = function (urls) {
+  selfInstance.start = function (urls) {
     cacheFileNames = [];
     if (!fs.existsSync(__dirname + '/' + selfInstance.options.previewDirName)) {
       fs.mkdirSync(__dirname + '/' + selfInstance.options.previewDirName);
@@ -216,9 +217,8 @@ var generator = function (options) {
   };
 }
 
-
-exports.Generator = generator;
-var g = new generator({
+exports.Factory = factory;
+var g = new factory({
   "debug": true,
   "maxConnections": 1,
   "callback": function (error) {
@@ -232,4 +232,5 @@ var g = new generator({
 
   }
 });
-g.startGenerator(['http://i.jandan.net/2014/04/24/selling-your-panties.html']);
+
+g.start(['http://jandan.net/2014/04/24/selling-your-panties.html']);

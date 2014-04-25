@@ -3,6 +3,7 @@
  */
 var ip = require('ip');
 var fs = require('fs');
+var util = require('util');
 var restify = require('restify');
 var connect = require('connect');
 var chokidar = require('chokidar');
@@ -26,7 +27,7 @@ var server = restify.createServer({
   version: '1.0.0'
 });
 
-server.get('/getPreviewURLS', function (req, res, next) {
+server.get('/getPreviewUrls', function (req, res, next) {
   var previewBasicURL = 'http://' + ip.address() + ':' + html_server_port + '/';
   if (fileChanged) {
     fileChanged = false;
@@ -41,9 +42,8 @@ server.get('/getPreviewURLS', function (req, res, next) {
 });
 
 server.listen(api_port, function () {
-  console.log('preview api host at: ', 'http://' + ip.address() + ':' + api_port + '/getPreviewURLS');
+  console.log('preview api host at: ', 'http://' + ip.address() + ':' + api_port + '/getPreviewUrls');
 });
-
 
 // watch directory file change
 
@@ -70,18 +70,10 @@ var getFileNamesInDir = function (dir) {
   if (!fs.existsSync(__dirname + '/' + dir)) {
     fs.mkdirSync(__dirname + '/' + dir);
   }
-  var files = fs.readdirSync('./' + dir)
-    .map(function (v) {
-      return { name: v,
-        time: fs.statSync(__dirname + '/' + dir + '/' + v).mtime.getTime()
-      };
-    })
+  var files = fs.readdirSync(__dirname + '/' + dir)
     .sort(function (a, b) {
-      return a.time - b.time;
+      return a > b;
     })
-    .map(function (v) {
-      return v.name;
-    });
   return files;
 }
 

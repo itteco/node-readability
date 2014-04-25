@@ -5,8 +5,8 @@ dist/*
 .idea
 node_modules
 
-**/test/preview-html/*
-**/test/preview-html-cache/*
+**/preview-html/*
+**/preview-html-cache/*
 
 # Xcode
 #
