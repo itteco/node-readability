@@ -53,7 +53,8 @@
     "restify": "latest",
     "request": "latest",
     "underScore":"latest",
-    "generic-pool":"git+https://joiningss@github.com/Joiningss/node-pool.git"
+    "generic-pool":"git+https://joiningss@github.com/Joiningss/node-pool.git",
+    "chokidar":"latest"
   },
   "engines": {
     "node": ">=0.2.5"
