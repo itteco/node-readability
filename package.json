@@ -42,7 +42,7 @@
   ],
   "dependencies": {
     "mjsunit.runner": ">=0.1.3",
-    "jsdom": "0.3",
+    "jsdom": "latest",
     "htmlparser": ">=1.7.6",
     "html5": ">=0.3.13",
     "iconv-lite": "0.2"
@@ -54,7 +54,10 @@
     "request": "latest",
     "underScore":"latest",
     "generic-pool":"git+https://joiningss@github.com/Joiningss/node-pool.git",
-    "chokidar":"latest"
+    "chokidar":"latest",
+    "ejs":"latest",
+    "ncp":"git+https://joiningss@github.com/Joiningss/ncp.git",
+    "qr-image":"latest"
   },
   "engines": {
     "node": ">=0.2.5"

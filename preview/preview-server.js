@@ -3,18 +3,18 @@
  */
 var ip = require('ip');
 var fs = require('fs');
-var util = require('util');
+var qr = require('qr-image');
 var restify = require('restify');
 var connect = require('connect');
 var chokidar = require('chokidar');
-var directory = 'preview-html';
+var directory = 'html';
 var api_port = 8912;
 var html_server_port = 9123;
 var debug = false;
 var fileChanged = true; //
 var fileNames = [];
 var watcher = chokidar.watch(__dirname + '/' + directory, {ignored: /[\/\\]\./, persistent: true});
-
+var qrcode_patch =__dirname+'/server-qrcode-image';
 // static html http server
 connect()
   .use(connect.static(directory))
@@ -23,7 +23,7 @@ connect()
 //create api server
 
 var server = restify.createServer({
-  name: 'preview-server',
+  name: 'Home',
   version: '1.0.0'
 });
 
@@ -42,7 +42,30 @@ server.get('/getPreviewUrls', function (req, res, next) {
 });
 
 server.listen(api_port, function () {
-  console.log('preview api host at: ', 'http://' + ip.address() + ':' + api_port + '/getPreviewUrls');
+
+  var address = ip.address()+':' + api_port;
+  var apiUrl = 'http://' + address + '/getPreviewUrls'
+  if(!fs.existsSync(qrcode_patch)){
+    fs.mkdirSync(qrcode_patch);
+  }
+  if(fs.existsSync(qrcode_patch+'/'+address+'.png')){
+    fs.unlinkSync(qrcode_patch+'/'+address+'.png');
+  }
+  var codeContent = {};
+  codeContent['name'] = server.name;
+  codeContent['url'] = apiUrl;
+  var code = qr.image(JSON.stringify(codeContent) , { type: 'png' });
+  var output = fs.createWriteStream(qrcode_patch+'/'+address+'.png');
+  code.pipe(output);
+
+  require('child_process').exec('open '+qrcode_patch+'/'+address+'.png', function callback(error, stdout, stderr){
+    // result
+    if(error){
+      console.error(error);
+    }
+  });
+
+  console.log('preview api host at: ', apiUrl);
 });
 
 // watch directory file change
@@ -71,6 +94,7 @@ var getFileNamesInDir = function (dir) {
     fs.mkdirSync(__dirname + '/' + dir);
   }
   var files = fs.readdirSync(__dirname + '/' + dir)
+    .filter(function(file) { return file.substr(-5) == '.html'; })
     .sort(function (a, b) {
       return a > b;
     })
