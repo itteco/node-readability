@@ -268,7 +268,4 @@ var g = new factory({
   }
 });
 
-g.start(['http://www.36kr.com/p/211530.html' +
-  '',
-         'http://jandan.net/2014/04/27/prespare-for-tornado.html',
-         'http://jandan.net/2014/04/26/remembering-numbers.html']);
+g.start(['http://jandan.net/2014/04/28/twitter-predict-crime.html']);
