@@ -3,28 +3,32 @@
  */
 var ip = require('ip');
 var fs = require('fs');
-var util = require('util');
+var path = require('path');
+var querystring = require('querystring');
+var qr = require('qr-image');
 var restify = require('restify');
 var connect = require('connect');
 var chokidar = require('chokidar');
-var directory = 'preview-html';
+var directory = 'html';
 var api_port = 8912;
 var html_server_port = 9123;
 var debug = false;
 var fileChanged = true; //
 var fileNames = [];
+var previews = [];
 var watcher = chokidar.watch(__dirname + '/' + directory, {ignored: /[\/\\]\./, persistent: true});
-
+var title_json_patch = path.join(__dirname,directory,'titles.json');
+var titleDic = {};
+var qrcode_patch =__dirname+'/server-qrcode-image';
 // static html http server
 connect()
-  .use(connect.static(directory))
+  .use(connect.static(__dirname+'/'+directory))
   .listen(html_server_port);
 
 //create api server
 
 var server = restify.createServer({
-  name: 'preview-server',
-  version: '1.0.0'
+  name: 'Joiningss', version: '1.0.0'
 });
 
 server.get('/getPreviewUrls', function (req, res, next) {
@@ -32,17 +36,43 @@ server.get('/getPreviewUrls', function (req, res, next) {
   if (fileChanged) {
     fileChanged = false;
     fileNames = getFileNamesInDir(directory);
+    if(fs.existsSync(title_json_patch)){
+      titleDic = JSON.parse(fs.readFileSync(title_json_patch));
+    }
+    previews = fileNames.map(function(a){
+      var title = titleDic[a]?titleDic[a]:a;
+      return {url:(previewBasicURL+querystring.escape(a)) ,title:title};
+    });
   }
-  var previewURLS = [];
-  fileNames.forEach(function (fileName) {
-    previewURLS.push(previewBasicURL + fileName);
-  });
-  res.send(previewURLS);
+  res.send(previews);
   return next();
 });
 
 server.listen(api_port, function () {
-  console.log('preview api host at: ', 'http://' + ip.address() + ':' + api_port + '/getPreviewUrls');
+
+  var address = ip.address()+':' + api_port;
+  var apiUrl = 'http://' + address + '/getPreviewUrls'
+  var qrcodeImagePath = qrcode_patch+'/'+server.name+'-'+address+'.png';
+  if(!fs.existsSync(qrcode_patch)){
+    fs.mkdirSync(qrcode_patch);
+  }
+  if(fs.existsSync(qrcode_patch+'/'+address+'.png')){
+    fs.unlinkSync(qrcode_patch+'/'+address+'.png');
+  }
+  var codeContent = {};
+  codeContent['name'] = server.name;
+  codeContent['url'] = apiUrl;
+  var code = qr.image(JSON.stringify(codeContent) , { type: 'png' });
+  var output = fs.createWriteStream(qrcodeImagePath);
+  code.pipe(output);
+
+  require('child_process').exec('open '+qrcodeImagePath, function callback(error){
+    if(error){
+      console.error(error);
+    }
+  });
+
+  console.log('preview api host at: '+ apiUrl);
 });
 
 // watch directory file change
@@ -70,10 +100,12 @@ var getFileNamesInDir = function (dir) {
   if (!fs.existsSync(__dirname + '/' + dir)) {
     fs.mkdirSync(__dirname + '/' + dir);
   }
+
   var files = fs.readdirSync(__dirname + '/' + dir)
+    .filter(function(file) { return file.substr(-5) == '.html'; })
     .sort(function (a, b) {
       return a > b;
-    })
+    });
   return files;
 }
 

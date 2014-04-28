@@ -2,26 +2,23 @@
  * Created by joiningss on 4/23/14.
  */
 
-var util = require('util');
 var request = require('request');
 var _ = require('underScore');
 var readability = require('../lib/readability.js');
 var fs = require('fs');
+var path = require('path');
 var Pool = require('generic-pool').Pool;
 var crypto = require('crypto');
-/**
- * Config
- */
-
-var enableHtmlCache = false; // If true, factory will use name-matching html files in ./preview-html-cache before download it
-
-var htmlTemple = '<!DOCTYPE html> <html> <head> <title> <!-- title --> </title> <meta content="text/html; charset=utf-8" http-equiv="content-type"/> <!-- css --> </head> <body> <!-- content --> </body> </html>';
-
-
+var ejs = require('ejs');
+var ncp = require('ncp').ncp;
+var templateStr = null;
+var cssFileNames = null;
+var titleDic = {};
+var title_json_patch = path.join(__dirname,'html/titles.json');
 var factory = function (options) {
   var selfInstance = this;
   selfInstance.options = _.extend({
-    maxConnections: 1,
+    maxConnections: 5,
     priorityRange: 10,
     priority: 3,
     retries: 3,
@@ -29,10 +26,11 @@ var factory = function (options) {
     method: "GET",
     debug: false,
     enableHtmlCache: true,
-    cacheDirName: 'preview-html-cache',
-    previewDirName:'preview-html',
-    cssThemeDirName:'preview-css-theme',
-    cssTheme:'default'
+    cacheDirName: 'html-cache',
+    previewDirName:'html',
+    themeDirName:'theme',
+    theme:'default',
+    defaultTheme: 'default'
   }, options);
   // Don't make these options persist to individual queries
   var masterOnlyOptions = ["maxConnections", "priorityRange", "onDrain"];
@@ -53,9 +51,14 @@ var factory = function (options) {
   var cacheFileNames = [];
   selfInstance.start = function (urls) {
     cacheFileNames = [];
-    if (!fs.existsSync(__dirname + '/' + selfInstance.options.previewDirName)) {
-      fs.mkdirSync(__dirname + '/' + selfInstance.options.previewDirName);
+    var previewPath = __dirname + '/' + selfInstance.options.previewDirName;
+    if (!fs.existsSync(previewPath)) {
+      fs.mkdirSync(previewPath);
+    }else{
+      deleteRecursiveSync(previewPath);
+      fs.mkdirSync(previewPath);
     }
+
     if (selfInstance.options.enableHtmlCache) {
       if (!fs.existsSync(__dirname + '/' + selfInstance.options.cacheDirName)) {
         fs.mkdirSync(__dirname + '/' + selfInstance.options.cacheDirName);
@@ -64,15 +67,29 @@ var factory = function (options) {
         cacheFileNames = fs.readdirSync(__dirname + '/' + selfInstance.options.cacheDirName);
       }
     }
-    urls = _.unique(urls);
-    selfInstance.queue(urls);
+    var themePath = __dirname+'/'+selfInstance.options.themeDirName+'/'+selfInstance.options.theme;
+    if(!fs.existsSync(themePath)){
+      themePath =  __dirname+'/'+selfInstance.options.themeDirName+'/'+selfInstance.options.defaultTheme;
+    }
+    templateStr =''+ fs.readFileSync(themePath+'/template.ejs');
+    cssFileNames = fs.readdirSync(themePath).filter(function(file) { return file.substr(-4) == '.css'; });
+    ncp(themePath,previewPath,{filter:function(name){
+      var extname = path.extname(name);
+      if(extname){
+        return extname !== '.ejs';
+      }else{
+        return true;
+      }
+    }},function(){
+      urls = _.unique(urls);
+      selfInstance.queue(urls);
+    });
   }
-
   selfInstance.queue = function (item) {
     //Did we get a list ? Queue all the URLs.
     if (_.isArray(item)) {
       for (var i = 0; i < item.length; i++) {
-        selfInstance.queue(item[i]);
+        selfInstance.queue( { 'uri':item[i],'index' : i+1});
       }
       return;
     }
@@ -158,6 +175,7 @@ var factory = function (options) {
       }
     });
   }
+
   selfInstance.onContent = function (error, toQueue, resultContent) {
     if (error) {
       return selfInstance.retry(error, toQueue);
@@ -167,13 +185,25 @@ var factory = function (options) {
     } else {
       readability.parse(resultContent, toQueue.uri, {removeReadabilityArtifacts: false, removeClassNames: false, debug: false, profile: 1}, function (info) {
         if (!info.error) {
-          var parserHtml = htmlTemple.replace('<!-- content -->', info.content);
-          var parserHtmlFilePath = __dirname + '/' + selfInstance.options.previewDirName + '/' + (info.title ? (info.title + ".html") : toQueue.uri);
-          fs.writeFile(parserHtmlFilePath, parserHtml, 'utf-8', function () {
+          var renderHtml = ejs.render(templateStr, {
+            title: info.title,
+            cssFiles: cssFileNames,
+            body: info.content
+          });
+          var fileName = path.basename(toQueue.uri);
+          if(fileName.substr(-5) !== '.html'){
+            fileName = fileName+'.html';
+          }
+          fileName = toQueue.index+'.'+fileName;
+          var parserHtmlFilePath = __dirname + '/' + selfInstance.options.previewDirName + '/' + fileName;
+          if(info.title){
+            titleDic[fileName]=toQueue.index+'. '+info.title;
+          }
+          fs.writeFile(parserHtmlFilePath, renderHtml, 'utf-8', function () {
             release(toQueue);
           });
         } else {
-          console.log('readability parser error: ' + toQueue.uri);
+          console.error(info.error+': ' + toQueue.uri);
           release(toQueue);
         }
       });
@@ -190,6 +220,7 @@ var factory = function (options) {
     // Pool stats are behaving weird - have to implement our own counter
     // console.log("POOL STATS",{"name":self.pool.getName(),"size":self.pool.getPoolSize(),"avail":self.pool.availableObjectsCount(),"waiting":self.pool.waitingClientsCount()});
     if (queuedCount + plannedQueueCallsCount === 0) {
+      fs.writeFileSync(title_json_patch,JSON.stringify(titleDic));
       if (selfInstance.options.onDrain && typeof selfInstance.options.onDrain == "function") selfInstance.options.onDrain();
     }
   };
@@ -215,22 +246,37 @@ var factory = function (options) {
     }
     return release(toQueue);
   };
+  var deleteRecursiveSync = function deleteRecursiveSync(itemPath) {
+    if (fs.statSync(itemPath).isDirectory()) {
+      _.each(fs.readdirSync(itemPath), function(childItemName) {
+        deleteRecursiveSync(path.join(itemPath, childItemName));
+      });
+      fs.rmdirSync(itemPath);
+    } else {
+      fs.unlinkSync(itemPath);
+    }
+  }
 }
 
 exports.Factory = factory;
 var g = new factory({
   "debug": true,
   "maxConnections": 1,
+  theme:"netease",
   "callback": function (error) {
     if (error) {
       runLogger.error(error);
     }
   },
   "onDrain": function () {
-
       console.log('onDrain');
-
   }
 });
 
-g.start(['http://jandan.net/2014/04/24/selling-your-panties.html']);
+g.start(['http://jandan.net/2014/04/28/no-idea-about.html',
+          'http://jandan.net/2014/04/26/remembering-numbers.html',
+          'http://tech2ipo.com/64618',
+          'http://tech2ipo.com/64608',
+         'http://www.36kr.com/p/211530.html',
+         'http://tech2ipo.com/64600',
+         'http://tech2ipo.com/64599']);

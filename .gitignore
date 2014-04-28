@@ -5,9 +5,9 @@ dist/*
 .idea
 node_modules
 
-**/preview-html/*
-**/preview-html-cache/*
-
+**/html/*
+**/html-cache/*
+**/server-qrcode-image/*
 # Xcode
 #
 **/build/
