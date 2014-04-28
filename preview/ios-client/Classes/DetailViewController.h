@@ -40,8 +40,6 @@
   VerticalSwipeScrollView* verticalSwipeScrollView;
   NSArray* previews;
   NSUInteger startIndex;
-  UIWebView* previousPage;
-  UIWebView* nextPage;
 }
 
 @property (nonatomic, retain) IBOutlet UIView* headerView;
@@ -55,6 +53,6 @@
 @property (nonatomic) NSUInteger startIndex;
 @property (nonatomic, retain) UIWebView* previousPage;
 @property (nonatomic, retain) UIWebView* nextPage;
-
+@property (nonatomic, retain) UIWebView* currentPage;
 @end
 

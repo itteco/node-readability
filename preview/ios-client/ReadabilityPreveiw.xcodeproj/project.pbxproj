@@ -41,6 +41,8 @@
 		F7AB19701906C56B008F0E5B /* FTAnimationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F7AB196E1906C56B008F0E5B /* FTAnimationManager.m */; };
 		F7AB19711906C56B008F0E5B /* FTAnimation+UIView.m in Sources */ = {isa = PBXBuildFile; fileRef = F7AB196F1906C56B008F0E5B /* FTAnimation+UIView.m */; };
 		F7AB19741906C571008F0E5B /* FTUtils+NSObject.m in Sources */ = {isa = PBXBuildFile; fileRef = F7AB19721906C571008F0E5B /* FTUtils+NSObject.m */; };
+		F7B728E4190EA054004A3CF0 /* MyURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = F7B728E3190EA054004A3CF0 /* MyURLProtocol.m */; };
+		F7E0BAEB190DFF500002F3AA /* preveiw_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F7E0BAEA190DFF500002F3AA /* preveiw_logo@2x.png */; };
 		F7FA867A190D65EE00FCC288 /* ZXBinarizer.m in Sources */ = {isa = PBXBuildFile; fileRef = F7FA865A190D65ED00FCC288 /* ZXBinarizer.m */; };
 		F7FA867B190D65EE00FCC288 /* ZXBinaryBitmap.m in Sources */ = {isa = PBXBuildFile; fileRef = F7FA865C190D65ED00FCC288 /* ZXBinaryBitmap.m */; };
 		F7FA867C190D65EE00FCC288 /* ZXDecodeHints.m in Sources */ = {isa = PBXBuildFile; fileRef = F7FA865E190D65ED00FCC288 /* ZXDecodeHints.m */; };
@@ -323,6 +325,9 @@
 		F7AB196E1906C56B008F0E5B /* FTAnimationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTAnimationManager.m; sourceTree = "<group>"; };
 		F7AB196F1906C56B008F0E5B /* FTAnimation+UIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FTAnimation+UIView.m"; sourceTree = "<group>"; };
 		F7AB19721906C571008F0E5B /* FTUtils+NSObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FTUtils+NSObject.m"; sourceTree = "<group>"; };
+		F7B728E2190EA054004A3CF0 /* MyURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyURLProtocol.h; sourceTree = "<group>"; };
+		F7B728E3190EA054004A3CF0 /* MyURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyURLProtocol.m; sourceTree = "<group>"; };
+		F7E0BAEA190DFF500002F3AA /* preveiw_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "preveiw_logo@2x.png"; sourceTree = "<group>"; };
 		F7FA8658190D65ED00FCC288 /* ZXBarcodeFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXBarcodeFormat.h; sourceTree = "<group>"; };
 		F7FA8659190D65ED00FCC288 /* ZXBinarizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXBinarizer.h; sourceTree = "<group>"; };
 		F7FA865A190D65ED00FCC288 /* ZXBinarizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXBinarizer.m; sourceTree = "<group>"; };
@@ -797,6 +802,8 @@
 			children = (
 				1D3623240D0F684500981E51 /* AppDelegate.h */,
 				1D3623250D0F684500981E51 /* AppDelegate.m */,
+				F7B728E2190EA054004A3CF0 /* MyURLProtocol.h */,
+				F7B728E3190EA054004A3CF0 /* MyURLProtocol.m */,
 				F726F689190C14FB00B86427 /* Server.h */,
 				F726F68A190C14FB00B86427 /* Server.m */,
 				F7A91FF2190BA9CC0094CFB3 /* ServerListViewController.h */,
@@ -859,6 +866,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F7E0BAEA190DFF500002F3AA /* preveiw_logo@2x.png */,
 				F7005CDA1904FDFD007665C7 /* Images.xcassets */,
 				28F335F01007B36200424DE2 /* PreviewListViewController.xib */,
 				28AD735F0D9D9599002E5188 /* MainWindow.xib */,
@@ -1688,6 +1696,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */,
+				F7E0BAEB190DFF500002F3AA /* preveiw_logo@2x.png in Resources */,
 				28F335F11007B36200424DE2 /* PreviewListViewController.xib in Resources */,
 				F7A91FF6190BA9CC0094CFB3 /* ServerListViewController.xib in Resources */,
 				F7005CDB1904FDFD007665C7 /* Images.xcassets in Resources */,
@@ -1916,6 +1925,7 @@
 				F7FA88BF190D662700FCC288 /* ZXEAN8Writer.m in Sources */,
 				F7FA88AC190D662700FCC288 /* ZXExpandedPair.m in Sources */,
 				F7FA88F4190D662700FCC288 /* ZXFinderPatternInfo.m in Sources */,
+				F7B728E4190EA054004A3CF0 /* MyURLProtocol.m in Sources */,
 				F7FA887C190D662700FCC288 /* ZXDataMatrixDecodedBitStreamParser.m in Sources */,
 				F7FA8882190D662700FCC288 /* ZXC40Encoder.m in Sources */,
 				F7FA88D0190D662700FCC288 /* ZXModulusPoly.m in Sources */,
@@ -1959,6 +1969,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ReadabilityPreveiw_Prefix.pch;
 				INFOPLIST_FILE = "ReadabilityPreveiw-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -1979,6 +1990,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ReadabilityPreveiw_Prefix.pch;
 				INFOPLIST_FILE = "ReadabilityPreveiw-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

@@ -67,9 +67,12 @@
     id jsonDic = [result.text JSONValue];
     if(jsonDic && [jsonDic isKindOfClass:[NSDictionary class]] && [jsonDic valueForKey:@"name"] && [jsonDic valueForKey:@"url"]){
       // Vibrate
+      if(self.delegate && [self.delegate respondsToSelector:@selector(onScaned:scanedInfo:)]){
+        [self.delegate onScaned:self scanedInfo:jsonDic];
+      }
       AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
     }else{
-      [CSNotificationView showInViewController:self.navigationController
+      [CSNotificationView showInViewController:self
                                          style:CSNotificationViewStyleError
                                        message:@"QRCode Error"];
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kCSNotificationViewDefaultShowDuration * NSEC_PER_SEC), dispatch_get_main_queue(), ^{

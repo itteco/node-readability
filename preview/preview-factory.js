@@ -13,7 +13,8 @@ var ejs = require('ejs');
 var ncp = require('ncp').ncp;
 var templateStr = null;
 var cssFileNames = null;
-
+var titleDic = {};
+var title_json_patch = path.join(__dirname,'html/titles.json');
 var factory = function (options) {
   var selfInstance = this;
   selfInstance.options = _.extend({
@@ -75,7 +76,7 @@ var factory = function (options) {
     ncp(themePath,previewPath,{filter:function(name){
       var extname = path.extname(name);
       if(extname){
-        return extname == '.css';
+        return extname !== '.ejs';
       }else{
         return true;
       }
@@ -88,7 +89,7 @@ var factory = function (options) {
     //Did we get a list ? Queue all the URLs.
     if (_.isArray(item)) {
       for (var i = 0; i < item.length; i++) {
-        selfInstance.queue(item[i]);
+        selfInstance.queue( { 'uri':item[i],'index' : i+1});
       }
       return;
     }
@@ -182,7 +183,7 @@ var factory = function (options) {
     if (!resultContent || resultContent == 'null') {
       return  selfInstance.retry(new Error("response body null"), toQueue);
     } else {
-      readability.parse(resultContent, toQueue.uri, {removeReadabilityArtifacts: false, removeClassNames: false, debug: false, profile: 1}, function (info) {
+      readability.parse(resultContent, toQueue.uri, {removeReadabilityArtifacts: true, removeClassNames: true, debug: false, profile: 1}, function (info) {
         if (!info.error) {
           var renderHtml = ejs.render(templateStr, {
             title: info.title,
@@ -193,7 +194,11 @@ var factory = function (options) {
           if(fileName.substr(-5) !== '.html'){
             fileName = fileName+'.html';
           }
+          fileName = toQueue.index+'.'+fileName;
           var parserHtmlFilePath = __dirname + '/' + selfInstance.options.previewDirName + '/' + fileName;
+          if(info.title){
+            titleDic[fileName]=toQueue.index+'. '+info.title;
+          }
           fs.writeFile(parserHtmlFilePath, renderHtml, 'utf-8', function () {
             release(toQueue);
           });
@@ -215,6 +220,7 @@ var factory = function (options) {
     // Pool stats are behaving weird - have to implement our own counter
     // console.log("POOL STATS",{"name":self.pool.getName(),"size":self.pool.getPoolSize(),"avail":self.pool.availableObjectsCount(),"waiting":self.pool.waitingClientsCount()});
     if (queuedCount + plannedQueueCallsCount === 0) {
+      fs.writeFileSync(title_json_patch,JSON.stringify(titleDic));
       if (selfInstance.options.onDrain && typeof selfInstance.options.onDrain == "function") selfInstance.options.onDrain();
     }
   };
@@ -256,16 +262,22 @@ exports.Factory = factory;
 var g = new factory({
   "debug": true,
   "maxConnections": 1,
+  theme:"netease",
   "callback": function (error) {
     if (error) {
       runLogger.error(error);
     }
   },
   "onDrain": function () {
-
       console.log('onDrain');
-
   }
 });
 
-g.start(['http://jandan.net/2014/04/28/twitter-predict-crime.html']);
+g.start(['http://jandan.net/2014/04/28/physicist-corrects-dictionaries.html','' +
+  'http://jandan.net/2014/04/28/no-idea-about.html',
+          'http://jandan.net/2014/04/26/remembering-numbers.html',
+          'http://tech2ipo.com/64618',
+          'http://tech2ipo.com/64608',
+         'http://www.36kr.com/p/211530.html',
+         'http://tech2ipo.com/64600',
+         'http://tech2ipo.com/64599']);

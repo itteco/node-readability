@@ -27,7 +27,7 @@
 
 #import "AppDelegate.h"
 #import "PreviewListViewController.h"
-
+#import "MyURLProtocol.h"
 
 #define TOP_APPS_URL @"http://itunes.apple.com/us/rss/toppaidapplications/limit=25/json"
 
@@ -58,6 +58,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  //register custom protocol
+  [NSURLProtocol registerClass:[MyURLProtocol class]];
   // Override point for customization after application launch.
   navigationController.delegate = self;
   [self.window addSubview:navigationController.view];

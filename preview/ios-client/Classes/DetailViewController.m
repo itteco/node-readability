@@ -54,6 +54,7 @@ CGFloat RadiansToDegrees(CGFloat radians) {return radians * 180/M_PI;};
   }else{
     contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
   }
+  self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refresh)];
 }
 
 -(void)willAppearIn:(UINavigationController *)navigationController
@@ -63,9 +64,12 @@ CGFloat RadiansToDegrees(CGFloat radians) {return radians * 180/M_PI;};
 }
 - (void)viewWillAppear:(BOOL)animated{
   [super viewWillAppear:animated];
-  CGRect verticalSwipeScrollViewFrame = self.view.frame;
-  self.verticalSwipeScrollView = [[VerticalSwipeScrollView alloc] initWithFrame:verticalSwipeScrollViewFrame contentInset:contentInset  startingAt:startIndex delegate:self];
-  [self.view addSubview:verticalSwipeScrollView];
+  if(self.verticalSwipeScrollView == nil){
+    CGRect verticalSwipeScrollViewFrame = self.view.frame;
+    self.verticalSwipeScrollView = [[VerticalSwipeScrollView alloc] initWithFrame:verticalSwipeScrollViewFrame contentInset:contentInset  startingAt:startIndex delegate:self];
+    [self.view addSubview:verticalSwipeScrollView];
+
+  }
 }
 # pragma mark VerticalSwipeScrollViewDelegate
 
@@ -73,21 +77,22 @@ CGFloat RadiansToDegrees(CGFloat radians) {return radians * 180/M_PI;};
 -(UIWebView*) viewForScrollView:(VerticalSwipeScrollView*)scrollView atPage:(NSUInteger)page
 {
   UIWebView* webView = nil;
-  if (page < scrollView.currentPageIndex)
-    webView = previousPage;
-  else if (page > scrollView.currentPageIndex)
-    webView = nextPage;
+//  if (page < scrollView.currentPageIndex)
+//    webView = previousPage;
+//  else if (page > scrollView.currentPageIndex)
+//    webView = nextPage;
   BOOL isCurrentPageLoading = NO;
   if (!webView){
     webView = [self createWebViewForIndex:page verticalSwipeScrollViewv:scrollView];
     isCurrentPageLoading = YES;
   }
   
-  self.previousPage = page > 0 ? [self createWebViewForIndex:page-1 verticalSwipeScrollViewv:scrollView] : nil;
-  self.nextPage = (page == (previews.count-1)) ? nil : [self createWebViewForIndex:page+1 verticalSwipeScrollViewv:scrollView];
+//  self.previousPage = page > 0 ? [self createWebViewForIndex:page-1 verticalSwipeScrollViewv:scrollView] : nil;
+//  self.nextPage = (page == (previews.count-1)) ? nil : [self createWebViewForIndex:page+1 verticalSwipeScrollViewv:scrollView];
   
   self.navigationItem.title = [NSString stringWithFormat:@"%d/%d",page+1,self.previews.count];
   [webView clearsContextBeforeDrawing];
+  self.currentPage = webView;
   return webView;
 }
 
@@ -124,13 +129,7 @@ CGFloat RadiansToDegrees(CGFloat radians) {return radians * 180/M_PI;};
   webView.opaque = NO;
   [webView setBackgroundColor:[UIColor clearColor]];
   [self hideGradientBackground:webView];
-  NSString * unencodedString = [self.previews objectAtIndex:index];
-//  NSString * urlString = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
-//                                                                             NULL,
-//                                                                             (CFStringRef)unencodedString,
-//                                                                             NULL,
-//                                                                             (CFStringRef)@"!*'();:@&=+$,/?%#[]",
-//                                                                             kCFStringEncodingUTF8 ));
+  NSString * unencodedString = [[self.previews objectAtIndex:index] valueForKey:@"url"];
   NSURL * url = [[NSURL alloc] initWithString:unencodedString];
   NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10];
   //[request setValue:@"http://jandan.net/" forHTTPHeaderField: @"Referer"];
@@ -141,6 +140,13 @@ CGFloat RadiansToDegrees(CGFloat radians) {return radians * 180/M_PI;};
 
 
 #pragma mark - UIWebView Delegate
+
+- (void)refresh{
+  NSURLRequest * newRequest = [[self.currentPage request] copy];
+  [self.currentPage stopLoading];
+  [self.currentPage loadRequest:newRequest];
+
+}
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
   NSLog(@"request.URL.absoluteURL: %@",request.URL.absoluteURL);

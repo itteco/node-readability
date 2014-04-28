@@ -12,10 +12,10 @@
 #import "AddServerViewController.h"
 #import "PreviewListViewController.h"
 #import "ScaneViewController.h"
-@interface ServerListViewController ()<AddServerViewControllerDelegate>
+@interface ServerListViewController ()<AddServerViewControllerDelegate,ScaneViewControllerDelegate>
 @property(nonatomic, strong) NSManagedObjectContext * managedObjectContext;
 @property(nonatomic, strong) NSFetchedResultsController *fetchedResultsController;
-@property(nonatomic, strong) UIBarButtonItem *rightBarButtonItem;
+@property(nonatomic, strong) NSArray *rightBarButtonItems;
 @property(nonatomic, strong) Server * selectedServer;
 @end
 
@@ -116,12 +116,11 @@ static NSString *CellIdentifier = @"Cell";
   [super setEditing:editing animated:animated];
   
   if (editing) {
-    self.rightBarButtonItem = self.navigationItem.rightBarButtonItem;
-    self.navigationItem.rightBarButtonItem = nil;
+    self.rightBarButtonItems = self.navigationItem.rightBarButtonItems;
+    self.navigationItem.rightBarButtonItems = nil;
   }
   else {
-    self.navigationItem.rightBarButtonItem = self.rightBarButtonItem;
-    self.rightBarButtonItem = nil;
+    self.navigationItem.rightBarButtonItems = self.rightBarButtonItems;
   }
 }
 
@@ -226,8 +225,66 @@ static NSString *CellIdentifier = @"Cell";
 }
 - (void)showScan{
   ScaneViewController * scv = [[ScaneViewController alloc] init];
+  scv.delegate = self;
   [self.navigationController presentViewController:scv animated:YES completion:nil];
 }
+
+
+- (void)onScaned:(ScaneViewController *)scaneViewController scanedInfo:(NSDictionary *)scanedInfo{
+  [scaneViewController dismissViewControllerAnimated:YES
+  completion:^{
+    dispatch_async(dispatch_get_main_queue(), ^{
+      NSString * name  = [scanedInfo valueForKey:@"name"];
+      NSString * url = [scanedInfo valueForKey:@"url"];
+      NSInteger sectionCount = [[self.fetchedResultsController sections] count];
+      BOOL exites = NO;
+      for (int section = 0; section < sectionCount ; section++) {
+        id <NSFetchedResultsSectionInfo> sectionInfo = [[self.fetchedResultsController sections] objectAtIndex:section];
+        NSInteger objectCount = [[sectionInfo objects] count];
+        for (int index = 0; index<objectCount; index++) {
+          Server * server = [[sectionInfo objects] objectAtIndex:index];
+          if([server.name isEqualToString:name] && [server.url isEqualToString:url]){
+            exites = YES;
+            self.selectedServer = server;
+            break;
+          }
+        }
+      }
+      if(!exites){
+        
+        Server * newServer = [NSEntityDescription insertNewObjectForEntityForName:@"Server" inManagedObjectContext:self.managedObjectContext];
+        newServer.name = [scanedInfo valueForKey:@"name"];
+        newServer.url = [scanedInfo valueForKey:@"url"];
+        newServer.creatDate = [NSDate date];
+        NSError *error;
+        if (![self.managedObjectContext save:&error]) {
+          /*
+           Replace this implementation with code to handle the error appropriately.
+           
+           abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+           */
+          NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+          abort();
+        }
+        
+        if (![[self.fetchedResultsController managedObjectContext] save:&error]) {
+          /*
+           Replace this implementation with code to handle the error appropriately.
+           
+           abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+           */
+          NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+          abort();
+        }
+        self.selectedServer = newServer;
+      }
+      PreviewListViewController * pcv = [[PreviewListViewController alloc] init];
+      pcv.server = self.selectedServer;
+      [self.navigationController pushViewController:pcv animated:YES];
+    });
+  }];
+}
+
 - (void)addServerViewController:(AddServerViewController *)controller server:(Server *)server didFinishWithSave:(BOOL)save{
   if (save) {
     /*

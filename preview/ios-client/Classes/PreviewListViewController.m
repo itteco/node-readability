@@ -48,10 +48,8 @@
     cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
   cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
   cell.textLabel.numberOfLines = 1;
-  NSString * urlString = [self.previews objectAtIndex:indexPath.row];
-  NSArray *parts = [urlString componentsSeparatedByString:@"/"];
-  NSString *filename = [NSString stringWithFormat:@"%d. %@",indexPath.row+1, [parts objectAtIndex:[parts count]-1]];
-  cell.textLabel.text = filename;
+  NSString * title = [[self.previews objectAtIndex:indexPath.row] valueForKey:@"title"];
+  cell.textLabel.text = title;
   return cell;
 }
 
@@ -86,7 +84,8 @@
 - (void)refresh{
     if(!self.loading && self.server){
     self.loading = YES;
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:self.server.url]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.server.url]];
+      [request setTimeoutInterval:5];
     NSURLConnection* topAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self] ;
     [topAppsConnection start];
     }
